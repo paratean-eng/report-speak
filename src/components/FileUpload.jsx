@@ -1,36 +1,29 @@
 import { useState, useRef, useCallback } from "react";
-import { Button } from "@/components/ui/button";
-import { Upload, File, X, CheckCircle, AlertCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Upload, X, CheckCircle } from "lucide-react";
+import { cn } from "../lib/utils";
 
-interface FileUploadProps {
-  onFileSelect: (file: File | null) => void;
-  selectedFile: File | null;
-  disabled?: boolean;
-}
-
-export const FileUpload = ({ onFileSelect, selectedFile, disabled }: FileUploadProps) => {
+export const FileUpload = ({ onFileSelect, selectedFile, disabled }) => {
   const [isDragOver, setIsDragOver] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef(null);
 
-  const handleDrag = useCallback((e: React.DragEvent) => {
+  const handleDrag = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
   }, []);
 
-  const handleDragIn = useCallback((e: React.DragEvent) => {
+  const handleDragIn = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragOver(true);
   }, []);
 
-  const handleDragOut = useCallback((e: React.DragEvent) => {
+  const handleDragOut = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragOver(false);
   }, []);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
+  const handleDrop = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragOver(false);
@@ -41,7 +34,7 @@ export const FileUpload = ({ onFileSelect, selectedFile, disabled }: FileUploadP
     }
   }, [onFileSelect]);
 
-  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileInput = (e) => {
     const file = e.target.files?.[0];
     if (file && file.type === "application/pdf") {
       onFileSelect(file);
@@ -74,15 +67,19 @@ export const FileUpload = ({ onFileSelect, selectedFile, disabled }: FileUploadP
                   {(selectedFile.size / 1024 / 1024).toFixed(1)} MB
                 </p>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
+              <button
                 onClick={handleRemoveFile}
-                className="flex-shrink-0 hover:bg-destructive/10 hover:text-destructive"
+                className={cn(
+                  "flex-shrink-0 inline-flex items-center justify-center rounded-md text-sm font-medium",
+                  "ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2",
+                  "focus-visible:ring-ring focus-visible:ring-offset-2 bg-transparent hover:bg-destructive/10",
+                  "hover:text-destructive h-10 w-10",
+                  "disabled:pointer-events-none disabled:opacity-50"
+                )}
                 disabled={disabled}
               >
                 <X className="w-4 h-4" />
-              </Button>
+              </button>
             </div>
           ) : (
             <div

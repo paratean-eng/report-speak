@@ -1,28 +1,12 @@
 import { useState, useRef, useEffect } from "react";
-import { ChatMessage } from "@/components/ChatMessage";
-import { ChatInput } from "@/components/ChatInput";
-import { FileUpload } from "@/components/FileUpload";
-import { useToast } from "@/hooks/use-toast";
+import { ChatMessage } from "../components/ChatMessage";
+import { ChatInput } from "../components/ChatInput";
+import { FileUpload } from "../components/FileUpload";
 import { Bot, FileText } from "lucide-react";
-
-interface Message {
-  id: string;
-  text: string;
-  isUser: boolean;
-  timestamp: string;
-  status?: string;
-}
-
-interface ApiResponse {
-  status: string;
-  response: string;
-  question: string;
-  step: string;
-  logs: string[];
-}
+import axios from "axios";
 
 export default function Chat() {
-  const [messages, setMessages] = useState<Message[]>([
+  const [messages, setMessages] = useState([
     {
       id: "1",
       text: "Hello! I'm your AI assistant. Upload a PDF and ask me to analyze it, or just start chatting!",
@@ -32,9 +16,8 @@ export default function Chat() {
     }
   ]);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { toast } = useToast();
+  const [selectedFile, setSelectedFile] = useState(null);
+  const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -44,8 +27,8 @@ export default function Chat() {
     scrollToBottom();
   }, [messages]);
 
-  const sendMessage = async (text: string) => {
-    const userMessage: Message = {
+  const sendMessage = async (text) => {
+    const userMessage = {
       id: Date.now().toString(),
       text,
       isUser: true,
@@ -64,18 +47,15 @@ export default function Chat() {
         formData.append("pdf_file", selectedFile);
       }
 
-      const response = await fetch("http://localhost:8000/ask", {
-        method: "POST",
-        body: formData,
+      const response = await axios.post("http://localhost:8000/ask", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      const data = response.data;
 
-      const data: ApiResponse = await response.json();
-
-      const aiMessage: Message = {
+      const aiMessage = {
         id: (Date.now() + 1).toString(),
         text: data.response || "I received your message but couldn't generate a response.",
         isUser: false,
@@ -93,7 +73,7 @@ export default function Chat() {
     } catch (error) {
       console.error("Error sending message:", error);
       
-      const errorMessage: Message = {
+      const errorMessage = {
         id: (Date.now() + 1).toString(),
         text: "I'm having trouble connecting to the server. Please make sure your FastAPI backend is running on http://localhost:8000",
         isUser: false,
@@ -102,12 +82,6 @@ export default function Chat() {
       };
 
       setMessages(prev => [...prev, errorMessage]);
-      
-      toast({
-        title: "Connection Error",
-        description: "Please check if your FastAPI backend is running.",
-        variant: "destructive",
-      });
     } finally {
       setIsLoading(false);
     }

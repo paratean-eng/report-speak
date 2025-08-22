@@ -1,17 +1,7 @@
-import { cn } from "@/lib/utils";
 import { Bot, User } from "lucide-react";
+import { cn } from "../lib/utils";
 
-interface ChatMessageProps {
-  message: {
-    id: string;
-    text: string;
-    isUser: boolean;
-    timestamp: string;
-    status?: string;
-  };
-}
-
-export const ChatMessage = ({ message }: ChatMessageProps) => {
+export const ChatMessage = ({ message }) => {
   return (
     <div className={cn(
       "flex gap-3 p-4 transition-smooth",
